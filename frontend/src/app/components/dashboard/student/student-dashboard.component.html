@@ -1,0 +1,147 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h3>
+            <i class="fas fa-graduation-cap"></i>
+            Welcome Student!
+            <small class="float-right">
+              <button class="btn btn-light btn-sm" (click)="logout()">
+                Logout
+              </button>
+            </small>
+          </h3>
+          <p class="mb-0">
+            Search and View Papers -
+            <strong>One-to-Many Relationship Demo</strong>
+          </p>
+        </div>
+        <div class="card-body">
+          <!-- Relationship Information -->
+          <div class="alert alert-info">
+            <h5>
+              <i class="fas fa-database"></i> Database Relationships
+              Demonstrated:
+            </h5>
+            <ul class="mb-0">
+              <li>
+                <strong>One-to-Many:</strong> Authors can write multiple papers
+              </li>
+              <li>
+                <strong>Many-to-Many:</strong> Papers can have multiple tags,
+                tags can belong to multiple papers
+              </li>
+              <li>
+                <strong>Inheritance:</strong> You're logged in as STUDENT role
+                with read-only access
+              </li>
+            </ul>
+          </div>
+
+          <!-- Search Section -->
+          <div class="row mb-4">
+            <div class="col-md-8">
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Search papers by title or abstract..."
+                  [(ngModel)]="searchQuery"
+                  (keyup.enter)="searchPapers()"
+                />
+                <div class="input-group-append">
+                  <button
+                    class="btn btn-outline-secondary"
+                    type="button"
+                    (click)="searchPapers()"
+                  >
+                    <i class="fas fa-search"></i> Search
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <button class="btn btn-secondary" (click)="loadAllPapers()">
+                <i class="fas fa-list"></i> View All Papers
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="loading" class="text-center">
+            <div class="spinner-border" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+            <p>Loading papers...</p>
+          </div>
+
+          <!-- Papers List -->
+          <div *ngIf="!loading">
+            <h5>
+              <i class="fas fa-file-alt"></i>
+              Available Papers
+              <span class="badge badge-secondary">{{
+                searchResults.length
+              }}</span>
+            </h5>
+
+            <div *ngIf="searchResults.length === 0" class="alert alert-warning">
+              <i class="fas fa-exclamation-triangle"></i>
+              No papers found. Try a different search term or check back later.
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3" *ngFor="let paper of searchResults">
+                <div class="card">
+                  <div class="card-header">
+                    <h6 class="card-title mb-0">
+                      <i class="fas fa-file-text"></i> {{ paper.title }}
+                    </h6>
+                    <small class="text-muted">
+                      <i class="fas fa-user"></i> Author:
+                      {{ paper.authorName || "Unknown" }}
+                      <span
+                        *ngIf="paper.published"
+                        class="badge badge-success ml-2"
+                      >
+                        <i class="fas fa-check-circle"></i> Published
+                      </span>
+                      <span
+                        *ngIf="!paper.published"
+                        class="badge badge-warning ml-2"
+                      >
+                        <i class="fas fa-clock"></i> Draft
+                      </span>
+                    </small>
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text">
+                      <strong>Abstract:</strong> {{ paper.abstract }}
+                    </p>
+                    <div
+                      *ngIf="paper.tags && paper.tags.length > 0"
+                      class="mb-2"
+                    >
+                      <strong>Tags (Many-to-Many):</strong>
+                      <span
+                        *ngFor="let tag of paper.tags"
+                        class="badge badge-info ml-1"
+                      >
+                        <i class="fas fa-tag"></i> {{ tag }}
+                      </span>
+                    </div>
+                    <small class="text-muted">
+                      <i class="fas fa-calendar"></i>
+                      Created: {{ paper.createdAt | date : "medium" }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

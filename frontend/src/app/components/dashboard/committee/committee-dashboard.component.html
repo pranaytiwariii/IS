@@ -1,0 +1,229 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-warning text-dark">
+          <h3>
+            <i class="fas fa-users"></i>
+            Welcome Committee Member!
+            <small class="float-right">
+              <button class="btn btn-dark btn-sm" (click)="logout()">
+                Logout
+              </button>
+            </small>
+          </h3>
+          <p class="mb-0">
+            Review and Publish Papers -
+            <strong>One-to-Many Relationship Demo</strong>
+          </p>
+        </div>
+        <div class="card-body">
+          <!-- Relationship Information -->
+          <div class="alert alert-warning">
+            <h5>
+              <i class="fas fa-database"></i> Database Relationships
+              Demonstrated:
+            </h5>
+            <ul class="mb-0">
+              <li>
+                <strong>One-to-Many:</strong> You (Committee) can publish
+                multiple papers
+              </li>
+              <li>
+                <strong>Foreign Key:</strong> Published papers reference your
+                user ID
+              </li>
+              <li>
+                <strong>Inheritance:</strong> You have COMMITTEE role with
+                publish permissions
+              </li>
+              <li>
+                <strong>Many-to-Many:</strong> View all paper-tag relationships
+              </li>
+            </ul>
+          </div>
+
+          <!-- Tab Navigation -->
+          <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                [class.active]="activeTab === 'pending'"
+                (click)="setActiveTab('pending')"
+                href="#"
+              >
+                <i class="fas fa-clock"></i>
+                Pending Papers
+                <span class="badge badge-warning">{{
+                  pendingPapers.length
+                }}</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a
+                class="nav-link"
+                [class.active]="activeTab === 'all'"
+                (click)="setActiveTab('all')"
+                href="#"
+              >
+                <i class="fas fa-list"></i>
+                All Papers
+                <span class="badge badge-secondary">{{
+                  allPapers.length
+                }}</span>
+              </a>
+            </li>
+          </ul>
+
+          <!-- Loading -->
+          <div *ngIf="loading" class="text-center">
+            <div class="spinner-border text-warning" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+            <p>Loading papers...</p>
+          </div>
+
+          <!-- Pending Papers Tab -->
+          <div *ngIf="!loading && activeTab === 'pending'">
+            <h5>
+              <i class="fas fa-clock"></i>
+              Papers Awaiting Review & Publication
+            </h5>
+
+            <div *ngIf="pendingPapers.length === 0" class="alert alert-info">
+              <i class="fas fa-info-circle"></i>
+              No papers are currently pending review. All papers have been
+              processed!
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3" *ngFor="let paper of pendingPapers">
+                <div class="card border-warning">
+                  <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">
+                      <i class="fas fa-file-text"></i> {{ paper.title }}
+                    </h6>
+                    <small class="text-muted">
+                      <i class="fas fa-user"></i> Author:
+                      {{ paper.authorName || "Unknown" }}
+                      <span class="badge badge-warning ml-2">
+                        <i class="fas fa-clock"></i> Awaiting Review
+                      </span>
+                    </small>
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text">
+                      <strong>Abstract:</strong> {{ paper.abstract }}
+                    </p>
+                    <div *ngIf="paper.content" class="mb-2">
+                      <strong>Content Preview:</strong>
+                      <p class="text-muted">
+                        {{ paper.content.substring(0, 150)
+                        }}{{ paper.content.length > 150 ? "..." : "" }}
+                      </p>
+                    </div>
+                    <div
+                      *ngIf="paper.tags && paper.tags.length > 0"
+                      class="mb-3"
+                    >
+                      <strong>Tags (Many-to-Many):</strong>
+                      <span
+                        *ngFor="let tag of paper.tags"
+                        class="badge badge-info ml-1"
+                      >
+                        <i class="fas fa-tag"></i> {{ tag }}
+                      </span>
+                    </div>
+                    <button
+                      class="btn btn-success"
+                      (click)="publishPaper(paper.id!)"
+                    >
+                      <i class="fas fa-check"></i> Publish Paper
+                    </button>
+                    <small class="text-muted d-block mt-2">
+                      <i class="fas fa-calendar"></i>
+                      Submitted: {{ paper.createdAt | date : "medium" }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- All Papers Tab -->
+          <div *ngIf="!loading && activeTab === 'all'">
+            <h5>
+              <i class="fas fa-list"></i>
+              All Papers in System (Relationship Overview)
+            </h5>
+
+            <div *ngIf="allPapers.length === 0" class="alert alert-info">
+              <i class="fas fa-info-circle"></i>
+              No papers in the system yet.
+            </div>
+
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead class="thead-dark">
+                  <tr>
+                    <th>ID</th>
+                    <th>Title</th>
+                    <th>Author (Foreign Key)</th>
+                    <th>Tags (Many-to-Many)</th>
+                    <th>Status</th>
+                    <th>Published By</th>
+                    <th>Created</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let paper of allPapers">
+                    <td>{{ paper.id }}</td>
+                    <td>{{ paper.title }}</td>
+                    <td>
+                      <i class="fas fa-user"></i>
+                      {{ paper.authorName || "Unknown" }}
+                      <small class="text-muted d-block"
+                        >ID: {{ paper.authorId }}</small
+                      >
+                    </td>
+                    <td>
+                      <span
+                        *ngFor="let tag of paper.tags"
+                        class="badge badge-info mr-1"
+                      >
+                        {{ tag }}
+                      </span>
+                    </td>
+                    <td>
+                      <span *ngIf="paper.published" class="badge badge-success">
+                        <i class="fas fa-check-circle"></i> Published
+                      </span>
+                      <span
+                        *ngIf="!paper.published"
+                        class="badge badge-warning"
+                      >
+                        <i class="fas fa-clock"></i> Draft
+                      </span>
+                    </td>
+                    <td>
+                      <span *ngIf="paper.publishedBy">
+                        <i class="fas fa-user-check"></i>
+                        {{ paper.publishedBy }}
+                      </span>
+                      <span *ngIf="!paper.publishedBy" class="text-muted"
+                        >-</span
+                      >
+                    </td>
+                    <td>
+                      <small>{{ paper.createdAt | date : "short" }}</small>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,220 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h3>
+            <i class="fas fa-pen"></i>
+            Welcome Author!
+            <small class="float-right">
+              <button class="btn btn-light btn-sm" (click)="logout()">
+                Logout
+              </button>
+            </small>
+          </h3>
+          <p class="mb-0">
+            Write and Manage Your Papers -
+            <strong>One-to-Many Relationship Demo</strong>
+          </p>
+        </div>
+        <div class="card-body">
+          <!-- Relationship Information -->
+          <div class="alert alert-success">
+            <h5>
+              <i class="fas fa-database"></i> Database Relationships
+              Demonstrated:
+            </h5>
+            <ul class="mb-0">
+              <li>
+                <strong>One-to-Many:</strong> You (Author) can write multiple
+                papers
+              </li>
+              <li>
+                <strong>Many-to-Many:</strong> Each paper can have multiple tags
+              </li>
+              <li>
+                <strong>Inheritance:</strong> You have AUTHOR role with
+                create/edit permissions
+              </li>
+              <li>
+                <strong>Foreign Key:</strong> Each paper references your user ID
+                as author
+              </li>
+            </ul>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="mb-4">
+            <button class="btn btn-primary" (click)="toggleCreateForm()">
+              <i class="fas fa-plus"></i>
+              {{ showCreateForm ? "Cancel" : "Create New Paper" }}
+            </button>
+            <button class="btn btn-secondary ml-2" (click)="loadMyPapers()">
+              <i class="fas fa-refresh"></i> Refresh My Papers
+            </button>
+          </div>
+
+          <!-- Create Paper Form -->
+          <div *ngIf="showCreateForm" class="card mb-4">
+            <div class="card-header">
+              <h5>
+                <i class="fas fa-edit"></i> Create New Paper (One-to-Many
+                Relationship)
+              </h5>
+            </div>
+            <div class="card-body">
+              <form>
+                <div class="form-group">
+                  <label for="title">Paper Title:</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="title"
+                    [(ngModel)]="newPaper.title"
+                    name="title"
+                    placeholder="Enter paper title"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="abstract">Abstract:</label>
+                  <textarea
+                    class="form-control"
+                    id="abstract"
+                    [(ngModel)]="newPaper.abstract"
+                    name="abstract"
+                    rows="3"
+                    placeholder="Enter paper abstract"
+                    required
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="content">Content:</label>
+                  <textarea
+                    class="form-control"
+                    id="content"
+                    [(ngModel)]="newPaper.content"
+                    name="content"
+                    rows="5"
+                    placeholder="Enter paper content"
+                  ></textarea>
+                </div>
+
+                <div class="form-group">
+                  <label for="tags">Tags (Many-to-Many Relationship):</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="tags"
+                    [(ngModel)]="newPaper.tags"
+                    name="tags"
+                    placeholder="Enter tags separated by commas (e.g., AI, Machine Learning, Research)"
+                  />
+                  <small class="form-text text-muted">
+                    Tags demonstrate Many-to-Many relationship: Multiple papers
+                    can share tags
+                  </small>
+                </div>
+
+                <div class="form-group">
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    (click)="createPaper()"
+                    [disabled]="!newPaper.title || !newPaper.abstract"
+                  >
+                    <i class="fas fa-save"></i> Create Paper
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-secondary ml-2"
+                    (click)="resetForm()"
+                  >
+                    <i class="fas fa-times"></i> Reset Form
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Loading -->
+          <div *ngIf="loading" class="text-center">
+            <div class="spinner-border text-success" role="status">
+              <span class="sr-only">Loading...</span>
+            </div>
+            <p>Loading your papers...</p>
+          </div>
+
+          <!-- My Papers List -->
+          <div *ngIf="!loading">
+            <h5>
+              <i class="fas fa-file-alt"></i>
+              My Papers (One-to-Many Relationship Demo)
+              <span class="badge badge-success">{{ myPapers.length }}</span>
+            </h5>
+
+            <div *ngIf="myPapers.length === 0" class="alert alert-info">
+              <i class="fas fa-info-circle"></i>
+              You haven't created any papers yet. Click "Create New Paper" to
+              get started!
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3" *ngFor="let paper of myPapers">
+                <div class="card border-success">
+                  <div class="card-header bg-light">
+                    <h6 class="card-title mb-0">
+                      <i class="fas fa-file-text"></i> {{ paper.title }}
+                    </h6>
+                    <small class="text-muted">
+                      <span *ngIf="paper.published" class="badge badge-success">
+                        <i class="fas fa-check-circle"></i> Published
+                      </span>
+                      <span
+                        *ngIf="!paper.published"
+                        class="badge badge-warning"
+                      >
+                        <i class="fas fa-clock"></i> Draft (Awaiting Committee
+                        Review)
+                      </span>
+                    </small>
+                  </div>
+                  <div class="card-body">
+                    <p class="card-text">
+                      <strong>Abstract:</strong> {{ paper.abstract }}
+                    </p>
+                    <div *ngIf="paper.content" class="mb-2">
+                      <strong>Content Preview:</strong>
+                      <p class="text-muted">
+                        {{ paper.content.substring(0, 100)
+                        }}{{ paper.content.length > 100 ? "..." : "" }}
+                      </p>
+                    </div>
+                    <div
+                      *ngIf="paper.tags && paper.tags.length > 0"
+                      class="mb-2"
+                    >
+                      <strong>Tags (Many-to-Many):</strong>
+                      <span
+                        *ngFor="let tag of paper.tags"
+                        class="badge badge-info ml-1"
+                      >
+                        <i class="fas fa-tag"></i> {{ tag }}
+                      </span>
+                    </div>
+                    <small class="text-muted">
+                      <i class="fas fa-calendar"></i>
+                      Created: {{ paper.createdAt | date : "medium" }}
+                    </small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
