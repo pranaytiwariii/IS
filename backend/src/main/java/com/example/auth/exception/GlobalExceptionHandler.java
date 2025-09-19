@@ -1,6 +1,8 @@
 package com.example.auth.exception;
 
 import com.example.auth.dto.MessageResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -14,8 +16,12 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        logger.warn("Validation error occurred: {}", ex.getMessage());
+        
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
@@ -26,12 +32,16 @@ public class GlobalExceptionHandler {
         StringBuilder errorMsg = new StringBuilder("Validation failed: ");
         errors.forEach((field, message) -> errorMsg.append(field).append(" - ").append(message).append("; "));
         
+        logger.debug("Validation errors: {}", errors);
+        
         return ResponseEntity.badRequest()
                 .body(new MessageResponse("Error: " + errorMsg.toString()));
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleGlobalException(Exception ex) {
+        logger.error("Unexpected error occurred: {}", ex.getMessage(), ex);
+        
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new MessageResponse("Error: An unexpected error occurred - " + ex.getMessage()));
     }

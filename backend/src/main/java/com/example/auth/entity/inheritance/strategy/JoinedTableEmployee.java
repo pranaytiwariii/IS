@@ -25,7 +25,7 @@ public class JoinedTableEmployee extends JoinedTablePerson {
     @Size(max = 100)
     private String department;
     
-    @Column(name = "salary", precision = 10, scale = 2)
+    @Column(name = "salary")
     private Double salary;
     
     @NotNull

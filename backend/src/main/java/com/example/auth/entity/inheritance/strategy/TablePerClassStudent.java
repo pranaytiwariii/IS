@@ -23,7 +23,7 @@ public class TablePerClassStudent extends TablePerClassPerson {
     @Size(max = 100)
     private String major;
     
-    @Column(name = "gpa", precision = 3, scale = 2)
+    @Column(name = "gpa")
     private Double gpa;
     
     @Column(name = "year_of_study")

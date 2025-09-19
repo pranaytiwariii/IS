@@ -21,7 +21,7 @@ public class SingleTableEmployee extends SingleTablePerson {
     @Size(max = 100)
     private String department;
     
-    @Column(name = "salary", precision = 10, scale = 2)
+    @Column(name = "salary")
     private Double salary;
     
     @Column(name = "hire_date")

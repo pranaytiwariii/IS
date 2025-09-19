@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,8 @@ import java.util.Optional;
 @RequestMapping("/api/papers")
 @Tag(name = "Papers", description = "Paper management APIs")
 public class PaperController {
+
+    private static final Logger logger = LoggerFactory.getLogger(PaperController.class);
 
     @Autowired
     private PaperService paperService;
@@ -54,17 +58,26 @@ public class PaperController {
             @Valid @RequestBody PaperRequest paperRequest,
             @Parameter(description = "Author username", required = true)
             @RequestParam String authorUsername) {
+        
+        logger.info("Creating paper request from author: {}, title: {}", 
+                   authorUsername, paperRequest.getTitle());
+        
         try {
             // Check if user exists and has AUTHOR role
             String userRole = authService.getUserRole(authorUsername);
             if (!"AUTHOR".equals(userRole)) {
+                logger.warn("Paper creation denied: User '{}' does not have AUTHOR role (current role: {})", 
+                           authorUsername, userRole);
                 return ResponseEntity.badRequest()
                         .body(new MessageResponse("Error: Only authors can create papers!"));
             }
 
             Paper paper = paperService.createPaper(paperRequest, authorUsername);
+            logger.info("Paper created successfully with ID: {}, title: '{}', author: {}", 
+                       paper.getId(), paper.getTitle(), authorUsername);
             return ResponseEntity.ok(new MessageResponse("Paper created successfully with ID: " + paper.getId()));
         } catch (Exception e) {
+            logger.error("Error creating paper for author '{}': {}", authorUsername, e.getMessage(), e);
             return ResponseEntity.badRequest()
                     .body(new MessageResponse("Error: " + e.getMessage()));
         }
@@ -85,7 +98,14 @@ public class PaperController {
     public ResponseEntity<List<Paper>> searchPapers(
             @Parameter(description = "Search keyword", required = false)
             @RequestParam(required = false) String keyword) {
+        
+        logger.info("Search papers request with keyword: '{}'", keyword != null ? keyword : "no keyword");
+        
         List<Paper> papers = paperService.searchPapers(keyword);
+        
+        logger.debug("Search completed - found {} papers for keyword: '{}'", 
+                    papers.size(), keyword != null ? keyword : "no keyword");
+        
         return ResponseEntity.ok(papers);
     }
 
@@ -114,17 +134,27 @@ public class PaperController {
     @PostMapping("/publish/{paperId}")
     public ResponseEntity<?> publishPaper(@PathVariable Long paperId,
                                          @RequestParam String committeeUsername) {
+        
+        logger.info("Publish paper request for paper ID: {}, committee member: {}", 
+                   paperId, committeeUsername);
+        
         try {
             // Check if user has COMMITTEE role
             String userRole = authService.getUserRole(committeeUsername);
             if (!"COMMITTEE".equals(userRole)) {
+                logger.warn("Paper publish denied: User '{}' does not have COMMITTEE role (current role: {})", 
+                           committeeUsername, userRole);
                 return ResponseEntity.badRequest()
                         .body(new MessageResponse("Error: Only committee members can publish papers!"));
             }
 
             Paper paper = paperService.publishPaper(paperId, committeeUsername);
+            logger.info("Paper published successfully - ID: {}, title: '{}', published by: {}", 
+                       paper.getId(), paper.getTitle(), committeeUsername);
             return ResponseEntity.ok(new MessageResponse("Paper published successfully!"));
         } catch (Exception e) {
+            logger.error("Error publishing paper ID: {}, committee member: '{}': {}", 
+                        paperId, committeeUsername, e.getMessage(), e);
             return ResponseEntity.badRequest()
                     .body(new MessageResponse("Error: " + e.getMessage()));
         }
