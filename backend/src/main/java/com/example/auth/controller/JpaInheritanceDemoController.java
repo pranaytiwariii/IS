@@ -1,6 +1,9 @@
 package com.example.auth.controller;
 
 import com.example.auth.entity.inheritance.strategy.*;
+import com.example.auth.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,8 +20,23 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/api/inheritance/jpa-strategies")
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
 public class JpaInheritanceDemoController {
+
+    @Autowired
+    private SingleTablePersonRepository singleTablePersonRepository;
+    
+    @Autowired
+    private JoinedTablePersonRepository joinedTablePersonRepository;
+    
+    @Autowired
+    private TablePerClassStudentRepository tpcStudentRepository;
+    
+    @Autowired
+    private TablePerClassAuthorRepository tpcAuthorRepository;
+    
+    @Autowired
+    private TablePerClassAdminRepository tpcAdminRepository;
 
     /**
      * GET /api/inheritance/jpa-strategies/overview
@@ -117,7 +135,12 @@ public class JpaInheritanceDemoController {
         admin.recordLogin();
         admin.addManagedArea("User Management");
 
-        return ResponseEntity.ok(Map.of(
+        // 🚀 SAVE TO DATABASE
+        student = singleTablePersonRepository.save(student);
+        author = singleTablePersonRepository.save(author);
+        admin = singleTablePersonRepository.save(admin);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
             "strategy", "SINGLE_TABLE Inheritance",
             "description", "All inheritance hierarchy entities stored in a single database table",
             "databaseSchema", Map.of(
@@ -137,15 +160,19 @@ public class JpaInheritanceDemoController {
                 "note", "All child-specific columns must be nullable since they're in the same table"
             ),
             "sampleData", Map.of(
+                "message", "✅ Successfully created and saved entities to PostgreSQL database",
                 "student", Map.of(
+                    "id", student.getId(),
                     "entity", student.getSingleTableInfo(),
                     "discrimination", "person_type = 'STUDENT'"
                 ),
                 "author", Map.of(
+                    "id", author.getId(),
                     "entity", author.getSingleTableInfo(),
                     "discrimination", "person_type = 'AUTHOR'"
                 ),
                 "admin", Map.of(
+                    "id", admin.getId(),
                     "entity", admin.getSingleTableInfo(),
                     "discrimination", "person_type = 'ADMIN'"
                 )
@@ -187,7 +214,12 @@ public class JpaInheritanceDemoController {
         admin.recordLogin();
         admin.addManagedArea("Department Users");
 
-        return ResponseEntity.ok(Map.of(
+        // 🚀 SAVE TO DATABASE
+        student = joinedTablePersonRepository.save(student);
+        author = joinedTablePersonRepository.save(author);
+        admin = joinedTablePersonRepository.save(admin);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
             "strategy", "JOINED Table Inheritance",
             "description", "Parent-child relationship with separate tables joined by foreign keys",
             "databaseSchema", Map.of(
@@ -294,7 +326,12 @@ public class JpaInheritanceDemoController {
         admin.addManagedArea("Content Review");
         admin.enableTwoFactor();
 
-        return ResponseEntity.ok(Map.of(
+        // 🚀 SAVE TO DATABASE
+        student = tpcStudentRepository.save(student);
+        author = tpcAuthorRepository.save(author);
+        admin = tpcAdminRepository.save(admin);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
             "strategy", "TABLE_PER_CLASS Inheritance",
             "description", "Complete separate table for each concrete class with all fields duplicated",
             "databaseSchema", Map.of(

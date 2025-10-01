@@ -19,11 +19,22 @@ public class CorsConfig {
         // Allow specific origin
         config.addAllowedOrigin("http://localhost:4200");
         
-        // Allow all headers
-        config.addAllowedHeader("*");
+        // Allow specific headers (cannot use "*" with credentials)
+        config.addAllowedHeader("Content-Type");
+        config.addAllowedHeader("Authorization");
+        config.addAllowedHeader("X-Requested-With");
+        config.addAllowedHeader("Accept");
+        config.addAllowedHeader("Origin");
+        config.addAllowedHeader("Access-Control-Request-Method");
+        config.addAllowedHeader("Access-Control-Request-Headers");
         
         // Allow all HTTP methods
-        config.addAllowedMethod("*");
+        config.addAllowedMethod("GET");
+        config.addAllowedMethod("POST");
+        config.addAllowedMethod("PUT");
+        config.addAllowedMethod("DELETE");
+        config.addAllowedMethod("OPTIONS");
+        config.addAllowedMethod("PATCH");
         
         // Allow credentials
         config.setAllowCredentials(true);
